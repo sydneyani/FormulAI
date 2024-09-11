@@ -2,17 +2,25 @@ import os
 import spacy
 from openai import OpenAI
 from dotenv import load_dotenv
+import subprocess
 
 # Load environment variables from .env file
 load_dotenv()
 
-# Load spaCy's English model
-nlp = spacy.load("en_core_web_sm")
+# Ensure the spaCy model is available
+def ensure_spacy_model():
+    try:
+        nlp = spacy.load("en_core_web_sm")
+    except OSError:
+        print("Downloading spaCy model...")
+        subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
+        nlp = spacy.load("en_core_web_sm")
+    return nlp
 
 # Initialize the OpenAI client
-client = OpenAI(
-    api_key=os.getenv("OPENAI_API_KEY")
-)
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+nlp = ensure_spacy_model()  # Ensure the model is loaded
 
 def preprocess_query(query):
     # Process the query using spaCy
@@ -28,9 +36,6 @@ def preprocess_query(query):
     return " ".join(filtered_tokens)
 
 def generate_formula(query, columns=None, sample_data=None):
-    """
-    Generates a formula based on the user's query and optionally the uploaded file's context (columns and sample data).
-    """
     try:
         # Preprocess the query using NLP
         preprocessed_query = preprocess_query(query)
@@ -50,7 +55,7 @@ def generate_formula(query, columns=None, sample_data=None):
                     "content": prompt,
                 }
             ],
-            model="gpt-4o-mini-2024-07-18"  # Use the correct model name
+            model="gpt-4o-mini-2024-07-18"
         )
 
         # Extract the generated message from the response
