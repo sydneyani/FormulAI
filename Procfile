@@ -1,3 +1,2 @@
-web: gunicorn app:app
-
-web: python -m spacy download en_core_web_sm && python app.py
+web: python app.py
+release: python -m spacy download en_core_web_sm
