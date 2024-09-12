@@ -34,7 +34,7 @@
             font-size: 2.5rem;
             font-weight: 700;
             margin-bottom: 30px;
-            text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+            text-shadow: 2px 2px 8px rgba(0, 255, 51, 0.2);
         }
 
         #query-input, #file-input {
@@ -48,9 +48,9 @@
         
 
         #query-input {
-            background-color: #333; /* Dark gray background */
-            color: #ccc; /* Light gray text */
-            border: 2px solid #444; /* Darker gray border */
+            background-color: #333;
+            color: #ccc;
+            border: 2px solid #444;
             border-radius: 8px;
             padding: 10px 15px;
             font-size: 16px;
@@ -59,9 +59,9 @@
         }
 
         #query-input:hover {
-            background-color: #444; /* Lighter gray on hover */
-            color: #fff; /* White text on hover */
-            border-color: #555; /* Lighter border on hover */
+            background-color: #444;
+            color: #fff;
+            border-color: #555;
         }
 
         #file-input-container {
@@ -70,9 +70,9 @@
         }
 
         #file-input {
-            background-color: #333; /* Dark gray background */
-            color: #ccc; /* Light gray text */
-            border: 2px solid #444; /* Darker gray border */
+            background-color: #333;
+            color: #ccc;
+            border: 2px solid #444;
             border-radius: 8px;
             padding: 10px 15px;
             font-size: 16px;
@@ -82,13 +82,13 @@
         }
 
         #file-input:hover {
-            background-color: #444; /* Lighter gray on hover */
-            color: #fff; /* White text on hover */
-            border-color: #555; /* Lighter border on hover */
+            background-color: #444;
+            color: #fff;
+            border-color: #555;
         }
 
         #file-input::file-selector-button {
-            background-color: #444; /* Lighter gray for button */
+            background-color: #444;
             border: 2px solid #555;
             padding: 5px 10px;
             border-radius: 5px;
@@ -101,7 +101,6 @@
             background-color: #555;
             border-color: #666;
         }
-
 
         #generate-button, #upload-button {
             padding: 15px 30px;
@@ -117,12 +116,6 @@
         #generate-button:hover, #upload-button:hover {
             background-color: #006722;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        /* Styling for the checkmark after file upload */
-        #file-input-container {
-            position: relative;
-            display: inline-block;
         }
 
         .checkmark {
@@ -166,35 +159,31 @@
         <form id="upload-form" enctype="multipart/form-data">
             <div id="file-input-container">
                 <input type="file" id="file-input" accept=".xls,.xlsx" class="form-control" />
-                <span class="checkmark">&#10003;</span> <!-- Checkmark that will appear after successful upload -->
+                <span class="checkmark">&#10003;</span>
             </div>
             <button id="upload-button" class="btn btn-primary mt-3">Upload Excel File</button>
         </form>
     </div>
 
-    <!-- Your JS logic goes here -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <script>
-        // Generate button logic (keep the original functionality)
+        // Generate formula
         document.getElementById('generate-button').addEventListener('click', function() {
             const query = document.getElementById('query-input').value;
             const resultElement = document.getElementById('result');
 
-            // Add loading animation or text while waiting for the response
             resultElement.innerText = 'Generating...';
 
-            // Send a POST request to the backend to generate the formula
-            fetch('/generate', {
+            fetch('https://formulai-mjtr.onrender.com/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query: query })
             })
             .then(response => response.json())
             .then(data => {
-                // Display the generated formula
                 resultElement.innerText = `Generated Formula: ${data.formula}`;
             })
             .catch(error => {
@@ -203,14 +192,13 @@
             });
         });
 
-        // Upload button logic with checkmark only (no result display for upload)
+        // Upload file
         document.getElementById('upload-button').addEventListener('click', function(event) {
             event.preventDefault();
 
             const fileInput = document.getElementById('file-input');
             const checkmark = document.querySelector('.checkmark');
 
-            // Check if a file has been selected
             if (fileInput.files.length === 0) {
                 alert('Please select an Excel file to upload.');
                 return;
@@ -218,7 +206,6 @@
 
             const file = fileInput.files[0];
 
-            // Ensure the file is an Excel file
             if (!file.name.endsWith('.xls') && !file.name.endsWith('.xlsx')) {
                 alert('Only Excel files (.xls, .xlsx) are allowed.');
                 return;
@@ -227,8 +214,7 @@
             const formData = new FormData();
             formData.append('file', file);
 
-            // Send the file to the backend
-            fetch('/upload', {
+            fetch('https://formulai-mjtr.onrender.com/upload', {
                 method: 'POST',
                 body: formData
             })
@@ -237,7 +223,6 @@
                 if (data.message.includes("Error")) {
                     alert(data.message);
                 } else {
-                    // Show checkmark after successful upload
                     checkmark.classList.add('show');
                 }
             })
