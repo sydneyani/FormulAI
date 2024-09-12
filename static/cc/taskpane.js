@@ -1,3 +1,6 @@
+// Update these with your actual backend URL
+const backendUrl = 'https://formulai-mjtr.onrender.com';
+
 // Handle Generate button click
 document.getElementById('generate-button').addEventListener('click', function() {
     const query = document.getElementById('query-input').value;
@@ -7,7 +10,7 @@ document.getElementById('generate-button').addEventListener('click', function() 
     resultElement.innerText = 'Generating...';
 
     // Send a POST request to the backend to generate the formula
-    fetch('/generate', {
+    fetch(`${backendUrl}/generate`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ query: query })
@@ -51,7 +54,7 @@ document.getElementById('upload-button').addEventListener('click', function(even
     formData.append('file', file);
 
     // Send the file to the backend
-    fetch('/upload', {
+    fetch(`${backendUrl}/upload`, {
         method: 'POST',
         body: formData
     })
