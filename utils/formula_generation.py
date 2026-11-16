@@ -1,8 +1,10 @@
 import os
+import subprocess
+import sys
+
 import spacy
 from openai import OpenAI
 from dotenv import load_dotenv
-import subprocess
 
 # Load environment variables from .env file
 load_dotenv()
@@ -10,15 +12,14 @@ load_dotenv()
 # Ensure the spaCy model is available
 def ensure_spacy_model():
     try:
-        nlp = spacy.load("en_core_web_sm")
+        return spacy.load("en_core_web_sm")
     except OSError:
         print("Downloading spaCy model...")
-        subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"])
-        nlp = spacy.load("en_core_web_sm")
-    return nlp
-
-# Initialize the OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        subprocess.run(
+            [sys.executable, "-m", "spacy", "download", "en_core_web_sm"],
+            check=True,
+        )
+        return spacy.load("en_core_web_sm")
 
 nlp = ensure_spacy_model()  # Ensure the model is loaded
 
@@ -37,6 +38,10 @@ def preprocess_query(query):
 
 def generate_formula(query, columns=None, sample_data=None):
     try:
+        api_key = os.getenv("OPENAI_API_KEY")
+        if not api_key:
+            return "Error generating formula: OPENAI_API_KEY is not set."
+
         # Preprocess the query using NLP
         preprocessed_query = preprocess_query(query)
 
@@ -48,6 +53,7 @@ def generate_formula(query, columns=None, sample_data=None):
         prompt = f"{file_context}Generate an Excel formula for: {preprocessed_query}"
 
         # Call OpenAI API
+        client = OpenAI(api_key=api_key)
         chat_completion = client.chat.completions.create(
             messages=[
                 {
