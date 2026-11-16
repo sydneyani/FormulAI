@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import pandas as pd
 import os
 import logging
@@ -10,6 +10,8 @@ app = Flask(__name__)
 # Folder to store uploaded files
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+# Reject very large workbooks before pandas reads them into memory.
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
 
 # Ensure the upload folder exists
 if not os.path.exists(UPLOAD_FOLDER):
@@ -28,6 +30,10 @@ def home():
 @app.route('/taskpane')
 def taskpane():
     return render_template('taskpane.html')
+
+@app.route('/assets/<path:filename>')
+def assets(filename):
+    return send_from_directory('assets', filename)
 
 # Endpoint for uploading Excel files
 @app.route('/upload', methods=['POST'])
@@ -78,8 +84,10 @@ def upload_file():
 def generate():
     global uploaded_file_data  # Use the uploaded file data
 
-    data = request.json
+    data = request.get_json(silent=True) or {}
     query = data.get('query')
+    if isinstance(query, str):
+        query = query.strip()
 
     if not query:
         return jsonify({"message": "Query is missing"}), 400
@@ -98,5 +106,6 @@ def generate():
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))  # Get the port from environment or default to 5000
-    app.run(host='0.0.0.0', port=port, debug=True)
+    debug = os.environ.get('FLASK_DEBUG', '0') == '1'
+    app.run(host='0.0.0.0', port=port, debug=debug)
 

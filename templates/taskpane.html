@@ -177,14 +177,18 @@
 
             resultElement.innerText = 'Generating...';
 
-            fetch('https://formulai-mjtr.onrender.com/generate', {
+            fetch('/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ query: query })
             })
             .then(response => response.json())
             .then(data => {
-                resultElement.innerText = `Generated Formula: ${data.formula}`;
+                if (data.formula) {
+                    resultElement.innerText = `Generated Formula: ${data.formula}`;
+                } else {
+                    resultElement.innerText = data.message || 'Error generating formula. Please try again.';
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
@@ -214,14 +218,16 @@
             const formData = new FormData();
             formData.append('file', file);
 
-            fetch('https://formulai-mjtr.onrender.com/upload', {
+            fetch('/upload', {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message.includes("Error")) {
-                    alert(data.message);
+            .then(response => response.json().then(data => ({ ok: response.ok, data })))
+            .then(({ ok, data }) => {
+                const message = data.message || '';
+                if (!ok || message.toLowerCase().includes('error')) {
+                    checkmark.classList.remove('show');
+                    alert(message || 'Upload failed.');
                 } else {
                     checkmark.classList.add('show');
                 }

@@ -1,5 +1,5 @@
-// Update these with your actual backend URL
-const backendUrl = 'https://formulai-mjtr.onrender.com';
+// Same origin as the page. Set a full origin only if the API is hosted elsewhere.
+const backendUrl = '';
 
 // Handle Generate button click
 document.getElementById('generate-button').addEventListener('click', function() {
@@ -19,7 +19,11 @@ document.getElementById('generate-button').addEventListener('click', function() 
     .then(data => {
         // Add a fade-in effect for the result
         resultElement.style.opacity = 0;
-        resultElement.innerText = `Generated Formula: ${data.formula}`;
+        if (data.formula) {
+            resultElement.innerText = `Generated Formula: ${data.formula}`;
+        } else {
+            resultElement.innerText = data.message || 'Error generating formula. Please try again.';
+        }
         resultElement.style.transition = 'opacity 1s';
         resultElement.style.opacity = 1;
     })
@@ -58,13 +62,12 @@ document.getElementById('upload-button').addEventListener('click', function(even
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        // Check if there's an error message
-        if (data.message && data.message.includes("Error")) {
-            resultElement.innerText = data.message;  // Show error if there's one
+    .then(response => response.json().then(data => ({ ok: response.ok, data })))
+    .then(({ ok, data }) => {
+        const message = (data && data.message) || '';
+        if (!ok || message.toLowerCase().includes('error')) {
+            resultElement.innerText = message || 'Upload failed.';
         } else {
-            // Only display success message after upload
             resultElement.innerText = `File uploaded successfully: ${file.name}`;
         }
     })
