@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# Secrets and local env
+.env
+.env.*
+!.env.example
+
+# Workbooks saved at runtime
+uploads/*
+!uploads/.gitkeep
+
+# OS and editor
+.DS_Store
+.idea/
+.vscode/
+
+# Local build leftovers
+dist/
+*.log
